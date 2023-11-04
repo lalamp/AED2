@@ -266,7 +266,7 @@ class TTFNode():
         print(self.keys)
         for child in self.children:
             child.preorder()
-    
+
     def levelorder(self):
         this_level = [self]
 
