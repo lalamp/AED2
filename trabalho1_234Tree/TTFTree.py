@@ -1,5 +1,4 @@
 from TTFNode import TTFNode
-
 class TTFTree():
     def __init__(self):
         self.root = TTFNode()
@@ -31,24 +30,98 @@ class TTFTree():
                 highLowNode = keyNode.children[keyIdx].getLeafNode(-1)
                 if highLowNode.getKeysNum() == 1:
                     # Caso 2 - o maior dos menores e o menor dos maiores está sozinho no nó folha
-                    if highLowNode.parent == keyNode:
-                        highLowNode.keys.append(lowHighNode.keys[0])
-                        keyNode.children.remove(lowHighNode)
-                        if keyNode.getKeysNum() == 1:
-                            keyNode = highLowNode
-                            self.root = keyNode
-                            del highLowNode
+                    if keyNode == self.root:
+                        if keyNode == highLowNode.parent:
+                            highLowNode.keys.append(lowHighNode.keys[0])
+                            keyNode.children.remove(lowHighNode)
+                            if keyNode.getKeysNum() == 1:
+                                keyNode = highLowNode
+                                self.root = keyNode
+                                del highLowNode
+                            else:
+                                keyNode.removeKey(keyIdx)
+                            print("Caso 2 1")
                         else:
-                            keyNode.removeKey(keyIdx)
-                        print("Caso 2")
+                            keyNode.keys[keyIdx] = highLowNode.keys[0]
+                            highLowNode.keys[0] = highLowNode.parent.keys[-1]
+                            highLowNode.parent.removeKey(-1)
+                            highLowNode.parent.children[-2].keys.append(highLowNode.keys[0])
+                            highLowNode.parent.children.remove(highLowNode)
+                            del highLowNode
+                            print("Caso 2 2")
+
                     else:
-                        keyNode.keys[keyIdx] = highLowNode.keys[0]
-                        highLowNode.keys[0] = highLowNode.parent.keys[-1]
-                        highLowNode.parent.removeKey(-1)
-                        highLowNode.parent.children[-2].keys.append(highLowNode.keys[0])
-                        highLowNode.parent.children.remove(highLowNode)
-                        del highLowNode
-                        print("Caso 2")
+                        parent = keyNode.parent
+                        adjacentBrother = keyNode.adjacentBrother()
+                        keyNodeIdx = parent.children.index(keyNode)
+
+                        if keyNodeIdx == (parent.getChildrenNum() - 1):
+                            if adjacentBrother.getKeysNum() != 1:
+                                keyNode.keys[keyIdx] = parent.keys[keyIdx-1]
+                                keyNode.keys.sort()
+                                parent.keys[keyIdx-1] = adjacentBrother.keys[-1]
+                                adjacentBrother.removeKey(-1)
+
+                                if highLowNode.parent.getChildrenNum() == 2:
+                                    highLowNode.parent.children[1].keys.append(highLowNode.keys[0])
+                                    highLowNode.parent.children[1].keys.sort()
+                                    highLowNode.keys = adjacentBrother.children[-1].keys
+                                    adjacentBrother.children.remove(adjacentBrother.children[-1])
+
+                                if highLowNode.parent.getChildrenNum() == 3:
+                                    highLowNode.parent.children[2].keys.insert(0, highLowNode.parent.children[1].keys[0])
+                                    highLowNode.parent.children[1] = highLowNode
+                                    highLowNode = adjacentBrother.children[-1]
+                                    adjacentBrother.children.remove(adjacentBrother.children[-1])
+
+                                if highLowNode.parent.getChildrenNum() == 4:
+                                    for key in highLowNode.parent.children[2]:
+                                        highLowNode.parent.children[3].keys.append(key)
+                                    highLowNode.parent.children[3].keys.sort()
+                                    if highLowNode.parent.children[3].getChildrenNum() > 4:
+                                        highLowNode.parent.children[3].split()
+
+                                    highLowNode.parent.children[2] = highLowNode.parent.children[1]
+                                    highLowNode.parent.children[1] = highLowNode
+                                    highLowNode = adjacentBrother.children[-1]
+                                    adjacentBrother.children.remove(adjacentBrother.children[-1])
+                                print("Caso 2 3")
+
+                            else:
+                                keyNode.keys[keyIdx] = parent.keys[keyIdx-1]
+                                keyNode.keys.append(adjacentBrother.keys[0])
+                                keyNode.keys.sort()
+                                keyNode.children.insert(0, adjacentBrother.children[0])
+                                adjacentBrother.children[0].parent = keyNode
+                                keyNode.children.insert(1, adjacentBrother.children[1])
+                                adjacentBrother.children[1].parent = keyNode
+                                keyNode.children[2].keys.append(keyNode.children[3].keys[0])
+                                keyNode.children.remove(keyNode.children[3])
+
+                                if keyNode.parent == self.root:
+                                    self.root = keyNode
+                                else:
+                                    parent.children.remove(adjacentBrother)
+                                print("Caso 2 4")
+
+                        else: #keyNodeIdx != (parent.getChildrenNum() - 1)
+                            if adjacentBrother.getKeysNum() == 1:
+                                keyNode.keys[keyIdx] = parent.keys[keyIdx]
+                                keyNode.keys.append(adjacentBrother.keys[0])
+                                keyNode.keys.sort()
+                                keyNode.children[0].keys.append(keyNode.children[1].keys[0])
+                                keyNode.children[0].keys.sort()
+                                keyNode.children.remove(keyNode.children[1])
+                                keyNode.children.append(adjacentBrother.children[0])
+                                keyNode.children.append(adjacentBrother.children[1])
+                                adjacentBrother.children[0].parent = keyNode
+                                adjacentBrother.children[1].parent = keyNode
+
+                                if keyNode.parent == self.root:
+                                    self.root = keyNode
+                                else:
+                                    parent.children.remove(adjacentBrother)
+                                print("Caso 2 5")
                 else:
                     # Caso 1 - buscando o maior dos menores
                     keyNode.keys[keyIdx] = highLowNode.keys[-1]
@@ -81,7 +154,6 @@ class TTFTree():
                 # Casos 5, 6 e 7
                 parent = keyNode.parent
                 keyNodeIdx = parent.children.index(keyNode)
-
                 adjacentBrother = keyNode.adjacentBrother()
 
                 # Caso 5 - nó folha com apenas uma chave e irmão adjacente tem mais de uma chave
@@ -127,6 +199,7 @@ class TTFTree():
                                 uncle.children.append(keyNode)
                             else:
                                 uncle.children.insert(0, keyNode)
+                            uncle.keys.sort()
                             keyNode.parent = uncle
                             self.root = uncle
 
@@ -147,6 +220,7 @@ class TTFTree():
                                 uncle.children.append(keyNode)
                             else:
                                 uncle.children.insert(0, keyNode)
+                            uncle.keys.sort()
                             keyNode.parent = uncle
 
                             grandparent.children.remove(parent)
