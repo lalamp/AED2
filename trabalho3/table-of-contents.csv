@@ -1,0 +1,14 @@
+entries,filename
+109,SDFB_groups.csv
+15824,SDFB_people.csv
+19992,SDFB_relationships_100000000_100020000.csv
+19995,SDFB_relationships_100020001_100040000.csv
+19998,SDFB_relationships_100040001_100060000.csv
+19998,SDFB_relationships_100060001_100080000.csv
+19993,SDFB_relationships_100080001_100100000.csv
+19995,SDFB_relationships_100100001_100120000.csv
+19990,SDFB_relationships_100120001_100140000.csv
+19996,SDFB_relationships_100140001_100160000.csv
+10531,SDFB_relationships_100160001_100180000.csv
+931,SDFB_relationships_greater_than_100180000.csv
+64,SDFB_RelationshipTypes.csv
